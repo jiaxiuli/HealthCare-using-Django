@@ -1,7 +1,8 @@
 from django import forms
-from myapp.models import Patient, Doctor
+from myapp.models import Patient, Doctor, Symptom, Photo, SymTransaction
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+
 
 class PatientForm(forms.ModelForm):
     class Meta:
@@ -37,9 +38,33 @@ class UserCreationForm(UserCreationForm):
         model = User
         fields = ("username", "email", "password1", "password2", "identity")
 
-    # def save(self, commit=True):
-    #     user = super(UserCreationForm, self).save(commit=False)
-    #     user.email = self.cleaned_data["email"]
-    #     if commit:
-    #         user.save()
-    #     return user
+
+class SymptomForm(forms.ModelForm):
+    class Meta:
+        model = Symptom
+        username = forms.CharField(required=False)
+        to = forms.CharField(required=False)
+        text = forms.CharField(required=False)
+        time = forms.CharField(required=False)
+        user_id = forms.CharField(required=False)
+        fields = {'username', 'to', 'text', 'time', 'user_id'}
+
+
+class PhotoForm(forms.ModelForm):
+    class Meta:
+        model = Photo
+        user_id = forms.CharField(required=False)
+        img = forms.FileField(required=False)
+        fields = {'user_id', 'img'}
+
+
+class SymTransactionForm(forms.ModelForm):
+    class Meta:
+        model = SymTransaction
+        patient_id = forms.CharField(required=False)
+        doctor_id = forms.CharField(required=False)
+        sym_id = forms.CharField(required=False)
+        send_time = forms.CharField(required=False)
+        isRead = forms.CharField(required=False)
+        fields = {'patient_id', 'doctor_id', 'sym_id', 'send_time', 'isRead'}
+

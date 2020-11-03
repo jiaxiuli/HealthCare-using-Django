@@ -4,6 +4,8 @@ from django.conf.urls import include
 from django.conf.urls import *
 from django.contrib.auth import views as auth_views
 from myapp import views
+from django.views.static import serve
+from django.conf import settings
 
 app_name = 'myapp'
 
@@ -14,13 +16,22 @@ urlpatterns = [
     path(r'userInfoChange',views.userInfoChange, name='userInfoChange'),
     path(r'userInfoChange_doctor',views.userInfoChange_doctor, name='userInfoChange_doctor'),
     path(r'account',views.account, name='account'),
+    path(r'DeleteSymRecord',views.DeleteSymRecord, name='DeleteSymRecord'),
+    path(r'addSymRecord',views.addSymRecord, name='addSymRecord'),
+    path(r'getDoctorList', views.getDoctorList, name='getDoctorList'),
+    path(r'sendRecordToDoctor', views.sendRecordToDoctor, name='sendRecordToDoctor'),
+    path(r'getReceivedRecord', views.getReceivedRecord, name='getReceivedRecord'),
     path(r'patient', views.patient, name='patient'),
+    path(r'recordIsRead', views.recordIsRead, name='recordIsRead'),
+    url(r'^upload', views.uploadImg),
     path(r'patient_response', views.patient, name='patient_response'),
     path(r'doctor', views.doctor, name='doctor'),
     path(r'doctor_response', views.doctor, name='doctor_response'),
     path(r'login', views.user_login, name='user_login'),
     path(r'logout', views.user_logout, name='user_logout'),
     path(r'register', views.register, name='register'),
+    url(r'^media/(?P<path>.*)$', serve, {"document_root": settings.MEDIA_ROOT}),
+
 
     path(r'accounts/', include('django.contrib.auth.urls')),
     path(r'password_change/done/',
@@ -36,7 +47,6 @@ urlpatterns = [
 
     path(r'reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path(r'password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
-
     path(r'reset/done/',
          auth_views.PasswordResetCompleteView.as_view(template_name='registration/password_reset_complete.html'),
          name='password_reset_complete'),

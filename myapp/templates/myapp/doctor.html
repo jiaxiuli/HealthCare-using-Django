@@ -9,7 +9,9 @@
 <body>
     <p id="error" style="display: none">{{ failed }}</p>
     <p id="username" style="display: none">{{ username }}</p>
-    <p id="email" style="display: none">{{ email }}</p>
+    <p id="last_name" style="display: none">{{ lastname }}</p>
+    <p id="first_name" style="display: none">{{ firstname }}</p>
+    <p id="photo" style="display: none">{{ photo }}</p>
     <div id="mask"></div>
     <div id="title">
         <h1></h1>
@@ -18,10 +20,15 @@
         <p id="message">The username has been existed.</p>
     </div>
 
+
+    <input name="file1" type="file" value="" size="20" id="fileUpload1" onchange ="uploadFile(this,1)">
+    <div id="show"></div>
+
+
     <span id="logout"> <a href="{% url 'myapp:user_logout' %}"> log out</a></span>
     <div id="navigation">
         <div class="naviItems" value="1" style="background-color:  rgba(0, 0, 0, 0.3);">Personal information</div>
-        <div class="naviItems" value="2">Doctor field</div>
+        <div class="naviItems" value="2"><div id="unreadCount"><p id="count"></p></div>Received Symptom</div>
         <div class="naviItems" value="3">Doctor field</div>
         <div class="naviItems" value="4">Doctor field</div>
     </div>
@@ -77,12 +84,21 @@
                <div id="submit"><input type="submit" value="OK" id="subtn" name="submit1"></div>
             </form>
         </div>
-        <div class="shownItems" value="2">this is the area for item2 of doctors</div>
-        <div class="shownItems" value="3">this is the area for item3 of doctors</div>
-        <div class="shownItems" value="4">this is the area for item4 of doctors</div>
+        <div class="shownItems" value="2">
+          <div id="requestArea">
+          </div>
+        </div>
+        <div class="shownItems" value="3">
+        </div>
+        <div class="shownItems" value="4">this is the area for item4 of Doctor</div>
     </div>
-    <div id="appointments">No appointment currently</div>
+     <div id="rightArea">
+        <div id="appointments">
+        <div id="noAppoint">No appointment currently</div>
+        </div>
+    </div>
 </body>
 <script src="../../static/myapp/js/jquery-1.10.1.js"></script>
-<script src="../../static/myapp/js/account.js"></script>
+<script src="../../static/myapp/js/ajaxfileupload.js"></script>
+<script src="../../static/myapp/js/DoctorAccount.js"></script>
 </html>

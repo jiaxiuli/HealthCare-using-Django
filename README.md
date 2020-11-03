@@ -1,13 +1,41 @@
 # Healthcare-app-using-Django
-# Main page, login and register page
-# Patient, Doctor information page
+# Main page
+![image](https://github.com/jiaxiuli/HealthCare/blob/master/IMG/home.png)
 
-![image](https://github.com/jiaxiuli/Healthcare-app-using-Django/blob/master/Images/1.gif)
+# Login page
+![image](https://github.com/jiaxiuli/HealthCare/blob/master/IMG/login.png)
 
-![image](https://github.com/jiaxiuli/Healthcare-app-using-Django/blob/master/Imagemations/2.gif)
+# register page
+In this page, JavaScript will check if the formate of the information that input by users is correct.
+![image](https://github.com/jiaxiuli/HealthCare/blob/master/IMG/register.png)
 
-![image](https://github.com/jiaxiuli/Healthcare-app-using-Django/blob/master/Images/3.gif)
+# patient account
+In this page, users can change their personal information by clicking the corresponding tag.
+![image](https://github.com/jiaxiuli/HealthCare/blob/master/IMG/patient%20account.png)
 
-![image](https://github.com/yang1c7/HealthCare/blob/master/IMG/Patient.jpg)
+# add a symptom record
+users can add a symptom record to their account, as well as they can delete the record.
+These change will be saved in the database directly.
+![image](https://github.com/jiaxiuli/HealthCare/blob/master/IMG/add%20record.png)
 
-![image](https://github.com/yang1c7/HealthCare/blob/master/IMG/Response.jpg)
+# send record to a doctor
+click the record you want to send, then the doctor list will be displayed, and choose a foctor to send to.
+![image](https://github.com/jiaxiuli/HealthCare/blob/master/IMG/send.png)
+
+# change profile photo 
+by clicking the photo, users can change their photo by picking from their computer.
+![image](https://github.com/jiaxiuli/HealthCare/blob/master/IMG/change%20photo.png)
+
+# doctor account
+![image](https://github.com/jiaxiuli/HealthCare/blob/master/IMG/doctor%20account.png)
+
+# check how many records I have received
+There is a red point beside the unread message and beside the "received symptom" tag with the number of unread messages.
+![image](https://github.com/jiaxiuli/HealthCare/blob/master/IMG/message.png)
+
+# Read the message
+![image](https://github.com/jiaxiuli/HealthCare/blob/master/IMG/read%20message.png)
+![image](https://github.com/jiaxiuli/HealthCare/blob/master/IMG/read%20message2.png)
+
+
+

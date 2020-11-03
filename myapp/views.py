@@ -1,14 +1,20 @@
+import json
 from datetime import datetime
 import pytz
+import time
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.contrib.postgres import serializers
+from django.views.decorators.clickjacking import xframe_options_exempt
+from django.views.decorators.csrf import csrf_exempt
+
 from myapp.forms import UserCreationForm
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from myapp.forms import PatientForm, DoctorForm
-from myapp.models import Topic, Patient, Doctor
+from myapp.forms import PatientForm, DoctorForm, SymptomForm
+from myapp.models import Topic, Patient, Doctor, Symptom, Photo, SymTransaction
 from django.views import View
 
 
@@ -26,6 +32,7 @@ class IndexView(View):
 
     def get_queryset(self):
         return Topic.objects.all().order_by('id')[:10]
+
 
 def patient(request):
     msg = ''
@@ -67,15 +74,21 @@ def account(request):
 def userInfoChange(request):
     if request.method == 'POST':
         form_obj = PatientForm(request.POST)
-        #print(form_obj)
+        # print(form_obj)
         if form_obj.is_valid():
             id = request.POST.get("id", "")
             patient = Patient.objects.filter(user_id=id)
             _patient = patient[0]
             oldUser = User.objects.filter(id=id)
             _oldUser = oldUser[0]
-
+            symRecord = Symptom.objects.filter(user_id=id)
             username = request.POST.get("username", "")
+            userPhoto = Photo.objects.filter(user_id=id)
+            if userPhoto:
+                _userPhoto = userPhoto[0].img.url
+            else:
+                _userPhoto = "/media/img/default.png"
+
             check = True
             if username:
                 checkifUsername = User.objects.filter(username=username)
@@ -84,9 +97,10 @@ def userInfoChange(request):
                 else:
                     _patient.username = username
                     _oldUser.username = username
+                    symRecord.update(username=username)
             email = request.POST.get("email", "")
             if email:
-                #_patient.email = email
+                # _patient.email = email
                 _oldUser.email = email
             first_name = request.POST.get("first_name", "")
             if first_name:
@@ -111,18 +125,74 @@ def userInfoChange(request):
             if address:
                 _patient.address = address
 
+            symptomList = Symptom.objects.filter(user_id=id)
+            symptom = list(symptomList)
+
             if not check:
                 return render(request, "myapp/account.html",
                               {'username': _patient.username, 'email': _oldUser.email, 'userId': id,
                                "firstname": _patient.first_name, "lastname": _patient.last_name,
-                               "age": _patient.age, "gender": g, "address": _patient.address, "failed": 1})
+                               "age": _patient.age, "gender": g, "address": _patient.address, "failed": 1, "symptom": symptom, "photo": _userPhoto})
             else:
                 _patient.save()
                 _oldUser.save()
+                for sym in symRecord:
+                    sym.save()
 
                 return render(request, "myapp/account.html", {'username': _patient.username, 'email': _oldUser.email, 'userId': id, "firstname": _patient.first_name, "lastname": _patient.last_name,
-                                                              "age": _patient.age, "gender": g, "address": _patient.address, "failed": 0})
+                                                              "age": _patient.age, "gender": g, "address": _patient.address, "failed": 0, "symptom": symptom, "photo": _userPhoto})
     return render(request, "myapp/account.html")
+
+
+@csrf_exempt
+def addSymRecord(request):
+    text = request.POST.get('text')
+    userId = request.POST.get('userId')
+    username = request.POST.get('username')
+    recordTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    if text:
+        sym = Symptom(user_id=userId, text=text, time=recordTime, username=username)
+        sym.save()
+    print("success")
+
+    symptomList = Symptom.objects.filter(user_id=userId).values()
+    symList = list(symptomList)
+
+    return HttpResponse(json.dumps(symList))
+
+
+@csrf_exempt
+def DeleteSymRecord(request):
+    symId = request.POST.get('id')
+    userId = request.POST.get('userId')
+    symptom = Symptom.objects.filter(id=symId)
+    _symptom = symptom[0]
+    _symptom.delete()
+
+    record = SymTransaction.objects.filter(sym_id=symId)
+    if record:
+        for rec in record:
+            rec.delete()
+
+    symptomList = Symptom.objects.filter(user_id=userId).values()
+    symList = list(symptomList)
+
+    return HttpResponse(json.dumps(symList))
+
+
+@csrf_exempt
+def getDoctorList(request):
+    doctorList = Doctor.objects.all().values()
+    docList = list(doctorList)
+    for doc in docList:
+        user = User.objects.filter(id=doc['user_id'])
+        doc['email'] = user[0].email
+        userPhoto = Photo.objects.filter(user_id=doc['user_id'])
+        if userPhoto:
+            doc['img'] = userPhoto[0].img.url
+        else:
+            doc['img'] = "/media/img/default.png"
+    return HttpResponse(json.dumps(docList))
 
 
 def userInfoChange_doctor(request):
@@ -136,6 +206,12 @@ def userInfoChange_doctor(request):
             _oldUser = oldUser[0]
 
             username = request.POST.get("username", "")
+            userPhoto = Photo.objects.filter(user_id=id)
+            if userPhoto:
+                _userPhoto = userPhoto[0].img.url
+            else:
+                _userPhoto = "/media/img/default.png"
+
             check = True
             if username:
                 checkifUsername = User.objects.filter(username=username)
@@ -146,7 +222,7 @@ def userInfoChange_doctor(request):
                     _oldUser.username = username
             email = request.POST.get("email", "")
             if email:
-                #_doctor.email = email
+                # _doctor.email = email
                 _oldUser.email = email
             first_name = request.POST.get("first_name", "")
             if first_name:
@@ -175,15 +251,14 @@ def userInfoChange_doctor(request):
                 return render(request, "myapp/doctor.html",
                               {'username': _doctor.username, 'email': _oldUser.email, 'userId': id,
                                "firstname": _doctor.first_name, "lastname": _doctor.last_name,
-                               "age": _doctor.age, "gender": g, "address": _doctor.address, "failed": 1})
+                               "age": _doctor.age, "gender": g, "address": _doctor.address, "failed": 1, "photo": _userPhoto})
             else:
                 _doctor.save()
                 _oldUser.save()
 
                 return render(request, "myapp/doctor.html", {'username': _doctor.username, 'email': _oldUser.email, 'userId': id, "firstname": _doctor.first_name, "lastname": _doctor.last_name,
-                                                              "age": _doctor.age, "gender": g, "address": _doctor.address, "failed": 0})
+                                                              "age": _doctor.age, "gender": g, "address": _doctor.address, "failed": 0, "photo": _userPhoto})
     return render(request, "myapp/doctor.html")
-
 
 
 def user_login(request):
@@ -194,7 +269,7 @@ def user_login(request):
         current_login_time = datetime.now(pytz.timezone('America/Toronto'))
         timestamp = current_login_time.strftime("%d-%b-%Y (%H:%M:%S)")
         request.session['last_login'] = 'Last Login: ' + timestamp
-        request.session.set_expiry(60)
+        request.session.set_expiry(300)
         if user:
             login(request, user)
             # if 'next' in request.POST:
@@ -235,10 +310,18 @@ def user_login(request):
                     age = message
                     gender = message
                     address = message
+
+                userPhoto = Photo.objects.filter(user_id=user.id)
+                if userPhoto:
+                    _userPhoto = userPhoto[0].img.url
+                else:
+                    _userPhoto = "/media/img/default.png"
+
                 return render(request, 'myapp/doctor.html', {'username': user.username, 'email': user.email,
                                                               'userId': user.id, "firstname": firstname,
                                                               "lastname": lastname,
-                                                              "age": age, "gender": gender, "address": address})
+                                                              "age": age, "gender": gender, "address": address,
+                                                              "photo": _userPhoto})
             # 病人
             else:
                 patient = Patient.objects.filter(user_id=user.id)
@@ -272,9 +355,16 @@ def user_login(request):
                         age = message
                         gender = message
                         address = message
+                symptomList = Symptom.objects.filter(user_id=user.id)
+                symptom = list(symptomList)
+                userPhoto = Photo.objects.filter(user_id=user.id)
+                if userPhoto:
+                    _userPhoto = userPhoto[0].img.url
+                else:
+                    _userPhoto = "/media/img/default.png"
                 return render(request, 'myapp/account.html', {'username': user.username, 'email': user.email,
                                                               'userId': user.id, "firstname": firstname, "lastname": lastname,
-                                                              "age":age, "gender": gender, "address": address})
+                                                              "age":age, "gender": gender, "address": address, "symptom": symptom, "photo": _userPhoto})
         else:
             return render(request, 'myapp/login.html', {'msg': True})
     else:
@@ -308,15 +398,110 @@ def register(request):
                 p = Patient(user_id=id, username=username, first_name=mes, last_name=mes,
                         address=mes, age=mes, gender=mes)
                 p.save()
-            #login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            # login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             return redirect('myapp:user_login')
         else:
             print("is not valid")
             return render(request, 'myapp/register0.html', {"error": 1})
     return render(request, 'myapp/register0.html', {"error": 0})
 
+
 @login_required
 def user_logout(request):
     request.session.flush()
     return HttpResponseRedirect(reverse('myapp:home'))
+
+
+@csrf_exempt
+@xframe_options_exempt
+def uploadImg(request):
+    file_obj = request.FILES.get('file1', None)
+    userId = request.POST.get('userId')
+
+    user = Photo.objects.filter(user_id=userId)
+    if user:
+        _user = user[0]
+        _user.img = file_obj
+        _user.save()
+    else:
+        new_img = Photo(
+            img=file_obj,
+            user_id=userId
+        )
+        new_img.save()
+    imgUrl = str(file_obj)
+    return HttpResponse(imgUrl)
+
+
+@csrf_exempt
+@xframe_options_exempt
+def sendRecordToDoctor(request):
+    symId = request.POST.get('symId')
+    patientId = request.POST.get('patientId')
+    docId = request.POST.get('docId')
+    sendTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    symRec = SymTransaction(patient_id=patientId, sym_id=symId, doctor_id=docId, send_time=sendTime, isRead=0)
+    symRec.save()
+    return HttpResponse("success")
+
+
+@csrf_exempt
+@xframe_options_exempt
+def getReceivedRecord(request):
+    userId = request.POST.get('userId')
+    # 获取symptom里面的信息
+    receivedRecord = SymTransaction.objects.filter(doctor_id=userId)
+    recRec = list(receivedRecord)
+    data = []
+
+    for rec in recRec:
+        # 需要头像 user表的信息 patient表的信息 symptom表的信息
+        # 头像信息
+        img = Photo.objects.filter(user_id=rec.patient_id)
+        _img = img[0]
+
+        # user表信息
+        user = User.objects.filter(id=rec.patient_id)
+        _user = user[0]
+
+        # patient表信息
+        patient = Patient.objects.filter(user_id=rec.patient_id)
+        _patient = patient[0]
+
+        # symptom表信息
+        sym = Symptom.objects.filter(id=rec.sym_id)
+        if sym:
+            _sym = sym[0]
+            c_time = _sym.time
+            text = _sym.text
+        else:
+            c_time = ""
+            text = "This record has been deleted."
+        obj = {
+            "img": _img.img.url,
+            "username": _user.username,
+            "first_name": _user.first_name,
+            "last_name": _user.last_name,
+            "email": _user.email,
+            "age": _patient.age,
+            "gender": _patient.gender,
+            "address": _patient.address,
+            "create_time": c_time,
+            "text": text,
+            "send_time": rec.send_time,
+            "transId": rec.id,
+            "isRead": rec.isRead
+        }
+        data.append(obj)
+    return HttpResponse(json.dumps(data))
+
+@csrf_exempt
+@xframe_options_exempt
+def recordIsRead(request):
+    transId = request.POST.get('transId')
+    rec = SymTransaction.objects.filter(id=transId)
+    _rec = rec[0]
+    _rec.isRead = 1
+    _rec.save()
+    return HttpResponse("success")
 

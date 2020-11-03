@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+    input{
+        width: 200px;
+        height: 200px;
+        border: 2px solid black;
+        border-radius: 100px;
+    }
+</style>
+</head>
+<body>
+    <input name="file1" type="file" value="选择" size="20" id="fileUpload1" onchange ="uploadFile(this,1)">
+</body>
+<script src="../../static/myapp/js/jquery-1.10.1.js"></script>
+<script src="../../static/myapp/js/ajaxfileupload.js"></script>
+<script>
+    function uploadFile(obj, type) {
+ $.ajaxFileUpload({
+     url : "uploadImg/",
+     secureuri : false,// 一般设置为false
+     fileElementId : "fileUpload"+type,// 文件上传表单的id <input type="file" id="fileUpload" name="file" />
+     dataType : 'json',// 返回值类型 一般设置为json
+     data: {'type': type},
+
+     success : function(data) // 服务器成功响应处理函数
+     {
+             },
+     error : function(data)// 服务器响应失败处理函数
+     {
+         console.log("服务器异常");
+     }
+ });
+ return false;
+}
+</script>
+</html>
