@@ -37,5 +37,15 @@ There is a red point beside the unread message and beside the "received symptom"
 ![image](https://github.com/jiaxiuli/HealthCare-using-Django/blob/master/IMG/read%20message.png)
 ![image](https://github.com/jiaxiuli/HealthCare-using-Django/blob/master/IMG/read%20message2.png)
 
+# write a reply
+![image](https://github.com/jiaxiuli/HealthCare-using-Django/blob/master/IMG/write_reply.png)
+
+# patients get reply notification
+![image](https://github.com/jiaxiuli/HealthCare-using-Django/blob/master/IMG/get%20reply.png)
+
+# read reply
+![image](https://github.com/jiaxiuli/HealthCare-using-Django/blob/master/IMG/read%20reply.png)
+
+
 
 
