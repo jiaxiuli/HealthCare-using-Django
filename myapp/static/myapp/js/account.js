@@ -34,6 +34,8 @@ var $mes = $('#message');
 var message = "click to update"
 
 var last_name = $changeln.html();
+const $unreadCount = $("#unreadCount");
+const $count = $("#count");
 
 var $add = $('#add');
 var $cancel = $('#cancel');
@@ -57,6 +59,13 @@ $navigation.fadeIn(1000);
 $showArea.fadeIn(1000);
 $appointments.fadeIn(1000);
 
+//向服务器询问是否有未读信息
+setInterval(function (){
+  getReceivedReply();
+}, 1000);
+
+
+
 $naviArray.click(function(){
     var index = this.getAttribute("value");
     $naviArray.each(function(){
@@ -66,6 +75,22 @@ $naviArray.click(function(){
             $(this).css('background-color', 'rgba(0, 0, 0, 0)');
         }
     });
+    if(index == 3){
+        getReceivedReply();
+        $showArea.animate({
+            width: "25%"
+        }, 800);
+         $("#rightArea").animate({
+            width: "40%"
+        }, 800);
+    }else{
+        $showArea.animate({
+            width: "40%"
+        }, 800);
+         $("#rightArea").animate({
+            width: "25%"
+        }, 800);
+    }
 
     $showitems.each(function(){
         if(index === this.getAttribute("value")){
@@ -333,7 +358,7 @@ function getDoctorList(record){
          "                <p style=\"font-size: small\">please select a doctor</p>").fadeIn(200);
      setTimeout(function (){
          $("#selected").fadeOut(400);
-     }, 1000);
+     }, 2000);
      $.ajax({
             url: '/getDoctorList',
             type: 'post',
@@ -392,7 +417,7 @@ function getDoctorList(record){
                                     $("#selected").html("<p style=\"margin-top: 30px\">Record Sent</p>").fadeIn(200);
                                         setTimeout(function (){
                                         $("#selected").fadeOut(400);
-                                        }, 1000);
+                                        }, 2000);
                                 },
 
                                 });
@@ -400,7 +425,7 @@ function getDoctorList(record){
                              $("#selected").html("<p style=\"margin-top: 30px\">Please select a record</p>").fadeIn(200);
                              setTimeout(function (){
                                     $("#selected").fadeOut(400);
-                            }, 1000);
+                            }, 2000);
                             console.log("choose a record")
                         }
 
@@ -414,3 +439,93 @@ $(".sendbtn").click(function (){
     getDoctorList(this);
 });
 
+function getReceivedReply(){
+  $.ajax({
+      url: '/getReceivedReply',
+      type: 'post',
+      data: {
+          userId: $("input[name=id]").val(),
+      },
+      success: function (data){
+          let obj = JSON.parse(data);
+          for(var i = 0 ; i < obj.length ; i++ ){
+               console.log("From: "+ obj[i].first_name + " " + obj[i].last_name);
+               console.log("original text: " + obj[i].text)
+              console.log("reply: " + obj[i].analysis + "   " +obj[i].treatment)
+          }
+
+           $('#requestArea').html('');
+                    for (var i = obj.length - 1; i >= 0; i--) {
+                        if (obj[i].isRead == 1) {
+                            $('#requestArea').append(
+                                '<div class="request">\n' +
+                                '<div class="red_point"></div>' +
+                                '<div id="index" style="display: none">' + i + '</div>' +
+                                '<div class="patient_photo"></div>\n' +
+                                '<div class="patient_name" style="top: 8px">' + obj[i].first_name + ' ' + obj[i].last_name + '</div>\n' +
+                                ' <div class="doc_info_left">' + obj[i].gender + '&emsp;'+ obj[i].age + '&emsp;' + obj[i].address +'</div>'+
+                                '</div>'
+                            );
+                        } else {
+                            $('#requestArea').append(
+                                '<div class="request">\n' +
+                                '<div class="red_point_unread"></div>' +
+                                '<div id="index" style="display: none">' + i + '</div>' +
+                                '<div class="patient_photo"></div>\n' +
+                                '<div class="patient_name" style="top: 8px">' + obj[i].first_name + ' ' + obj[i].last_name + '</div>\n' +
+                                ' <div class="doc_info_left">' + obj[i].gender + '&emsp;'+ obj[i].age + '&emsp;' + obj[i].address +'</div>'+
+                                '</div>');
+                        }
+
+                    }
+                    for (var i = obj.length - 1; i >= 0; i--) {
+                        $(".patient_photo:eq(" + (obj.length - 1 - i) + ")").css(
+                            {"background-image": "url('../../../.." + obj[i].img + "')"},
+                            {"background-size": "cover"});
+                    }
+                     $(".request").click(function () {
+                        const index = $(this).find("#index").html();
+                        getReplyIndex = index;
+                        console.log(obj[index])
+                        $(this).find(".red_point_unread").fadeOut(400);
+                        $("#rightArea").html(' <div class="reply_info">\n' +
+                            '<p>Original message</p>\n' +
+                            '<em>sent at: '+obj[index].create_time+'</em>\n' +
+                            '<div class="doc_name">'+obj[index].first_name+' '+obj[index].last_name+'</div>\n' +
+                            '<div class="ori_mes">'+ '&nbsp;&nbsp;'+ obj[index].text+'</div>\n' +
+                            '<p>Analysis</p>\n' +
+                            '<div class="ana_mes">\n' +'&nbsp;&nbsp;'+obj[index].analysis+
+                            '<div class="reply_time">wrote at: '+obj[index].send_time+'</div>\n' +
+                            '</div>\n' +
+                            '<p>Treatment</p>\n' +
+                            '<div class="treat_mes">\n' + '&nbsp;&nbsp;'+ obj[index].treatment+
+                            '<div class="reply_time">wrote at: '+obj[index].send_time+'</div>\n' +
+                            '</div>\n' +
+                            '</div>')
+                          $.ajax({
+                            url: '/replyIsRead',
+                            type: 'post',
+                            data: {
+                                "transId": obj[index].transId
+                            },
+                            success: function () {
+                            }
+                        });
+                    }).mousedown(function (){
+                        $(this).css("background-color", "rgba(0,0,0,0.5)")
+                    }).mouseup(function (){
+                        $(this).css("background-color", "rgba(0,0,0,0)")
+                    });
+                    let unreadList = $(".red_point_unread");
+                    let unreadCount = unreadList.length;
+                    if(unreadCount == 0){
+                        $unreadCount.css("display", "none");
+                    }else{
+                        $unreadCount.css("display", "block");
+                        $count.html(unreadCount);
+                    }
+
+
+      }
+  });
+}

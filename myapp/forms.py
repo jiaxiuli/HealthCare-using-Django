@@ -1,5 +1,5 @@
 from django import forms
-from myapp.models import Patient, Doctor, Symptom, Photo, SymTransaction
+from myapp.models import Patient, Doctor, Symptom, Photo, SymTransaction, ReplyTransaction
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
@@ -67,4 +67,17 @@ class SymTransactionForm(forms.ModelForm):
         send_time = forms.CharField(required=False)
         isRead = forms.CharField(required=False)
         fields = {'patient_id', 'doctor_id', 'sym_id', 'send_time', 'isRead'}
+
+
+class ReplyTransactionForm(forms.ModelForm):
+    class Meta:
+        model = ReplyTransaction
+        patient_id = forms.CharField(required=False)
+        doctor_id = forms.CharField(required=False)
+        sym_id = forms.CharField(required=False)
+        send_time = forms.CharField(required=False)
+        isRead = forms.CharField(required=False)
+        analysis = forms.CharField(required=False)
+        treatment = forms.CharField(required=False)
+        fields = {'patient_id', 'doctor_id', 'sym_id', 'send_time', 'isRead', 'analysis', 'treatment'}
 

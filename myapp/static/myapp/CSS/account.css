@@ -172,11 +172,11 @@ input{
 }
 .left{
     position: absolute;
-    left: 0px;
+    left: 0;
 }
 .right{
     position: absolute;
-    right: 0px;
+    right: 0;
 }
 #message{
     position: absolute;
@@ -482,29 +482,35 @@ input{
 .reply{
     position: absolute;
     width: 90%;
-    height: 40%;
+    height: 49%;
     left: 5%;
-    top: 48%;
+    top: 46%;
 }
 .analysis{
     position: absolute;
     width: 48%;
-    height: 100%;
-    border-radius: 30px;
+    height: 80%;
+    border-radius: 15px;
     border: 2px solid white;
 }
 .treatment{
     position: absolute;
     width: 48%;
-    height: 100%;
+    height: 80%;
     right: 0;
     border: 2px solid white;
-    border-radius: 30px;
+    border-radius: 15px;
+}
+textarea{
+    font-size: large;
+    font-weight: 900;
+    background-color: rgba(0,0,0,0.3);
+    color: white;
 }
 .done{
     position: absolute;
     width: 20%;
-    bottom: 3%;
+    top: 93%;
     left: 40%;
     height: 30px;
     border-radius: 20px;
@@ -545,4 +551,136 @@ input{
 }
 em{
     color: darkseagreen;
+}
+.a_and_t{
+    font-size: medium;
+}
+.doc_info_left{
+    position: absolute;
+    width: 200px;
+    left: 80px;
+    top: 37px;
+    font-size: small;
+    font-weight: 900;
+    color: darkgray;
+}
+.reply_info{
+    position: absolute;
+    width: 90%;
+    height: 100%;
+    left: 5%;
+}
+.reply_info :first-child{
+    position: absolute;
+    font-size: large;
+    top: 2%;
+    color: darkgray;
+    font-weight: 900;
+}
+.reply_info :nth-child(2){
+    position: absolute;
+    font-size: 5px;
+    top: 3%;
+    left: 30%;
+}
+.reply_info :nth-child(5){
+    position: absolute;
+    font-size: large;
+    top: 32%;
+    color: darkgray;
+    font-weight: 900;
+}
+.reply_info :nth-child(7){
+    position: absolute;
+    font-size: large;
+    top: 65%;
+    color: darkgray;
+    font-weight: 900;
+}
+.ori_mes{
+    position: absolute;
+    width: 100%;
+    height: 15%;
+    top: 7%;
+    font-size: 15px;
+    font-weight: 900;
+    border-radius: 20px;
+    border: 1px dashed white;
+}
+.ana_mes{
+    position: absolute;
+    width: 100%;
+    height: 25%;
+    top: 37%;
+    font-size: 15px;
+    font-weight: 900;
+    border-radius: 20px;
+    border: 1px dashed white;
+}
+.treat_mes{
+    position: absolute;
+    width: 100%;
+    height: 25%;
+    top:70%;
+    font-size: 15px;
+    font-weight: 900;
+    border-radius: 20px;
+    border: 1px dashed white;
+}
+.doc_name{
+    position: absolute;
+    top: 24%;
+    font-size: 30px;
+    color: lightskyblue;
+    font-weight: 900;
+}
+
+.reply_time{
+    width: 200px;
+    font-size: 5px!important;
+    color: darkgray;
+    font-weight: 900;
+    left: 20px;
+    top: 86%!important;
+}
+#reply_failed{
+    width: 25%;
+    height: 70%;
+    right: 3%;
+    top: 25%;
+    position: absolute;
+    border-radius: 50px;
+    color: white;
+    text-align: center;
+    border: 1px solid white;
+    z-index: 100;
+    display: none;
+    background-color: rgba(0, 0, 0, 0.85);
+}
+#reply_failed_p1{
+    position: relative;
+    top: 30%;
+    font-size: 40px;
+
+}
+#reply_failed_p2{
+    position: relative;
+    top: 35%;
+    font-size: 20px;
+    color: white;
+}
+#reply_sent{
+    width: 300px;
+    height: 200px;
+    position: absolute;
+    right: 200px;
+    z-index: 100;
+    background-color: rgba(0,0,0,0.9);
+    top: 42%;
+    border-radius: 30px;
+    font-size: 30px;
+    line-height: 200px;
+    color: white;
+    text-align: center;
+    display: none;
 }

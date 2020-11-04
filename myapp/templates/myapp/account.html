@@ -29,7 +29,7 @@
     <div id="navigation">
         <div class="naviItems" value="1" style="background-color:  rgba(0, 0, 0, 0.3);">Personal information</div>
         <div class="naviItems" value="2">Symptom</div>
-        <div class="naviItems" value="3">Patient field</div>
+        <div class="naviItems" value="3"><div id="unreadCount"><p id="count"></p></div>Doctor Reply</div>
         <div class="naviItems" value="4">Patient field</div>
     </div>
     <div id="showArea">
@@ -95,7 +95,7 @@
                     <input type="text" value="{{ userId }}" name="userId" style="display: none">
                     <input type="text" value="{{ username }}" name="username" style="display: none">
                     Symptom:
-                    <textarea type="text" rows="16" cols="50" name="sym"></textarea>
+                    <textarea type="text" rows="13" cols="45" name="sym"></textarea>
                     <button id="save">Save</button>
                 </div>
                 <button id="cancel">Cancel</button>
@@ -118,6 +118,8 @@
             <button id="add"></button>
         </div>
         <div class="shownItems" value="3">
+              <div id="requestArea">
+          </div>
         </div>
         <div class="shownItems" value="4">this is the area for item4 of patients</div>
     </div>

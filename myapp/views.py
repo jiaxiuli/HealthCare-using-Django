@@ -14,7 +14,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from myapp.forms import PatientForm, DoctorForm, SymptomForm
-from myapp.models import Topic, Patient, Doctor, Symptom, Photo, SymTransaction
+from myapp.models import Topic, Patient, Doctor, Symptom, Photo, SymTransaction, ReplyTransaction
 from django.views import View
 
 
@@ -173,6 +173,10 @@ def DeleteSymRecord(request):
     if record:
         for rec in record:
             rec.delete()
+    reply = ReplyTransaction.objects.filter(sym_id=symId)
+    if reply:
+        for rep in reply:
+            rep.delete()
 
     symptomList = Symptom.objects.filter(user_id=userId).values()
     symList = list(symptomList)
@@ -490,7 +494,10 @@ def getReceivedRecord(request):
             "text": text,
             "send_time": rec.send_time,
             "transId": rec.id,
-            "isRead": rec.isRead
+            "isRead": rec.isRead,
+            "patient_id": rec.patient_id,
+            "doctor_id":rec.doctor_id,
+            "sym_id": rec.sym_id
         }
         data.append(obj)
     return HttpResponse(json.dumps(data))
@@ -505,3 +512,90 @@ def recordIsRead(request):
     _rec.save()
     return HttpResponse("success")
 
+
+@csrf_exempt
+@xframe_options_exempt
+def replyIsRead(request):
+    transId = request.POST.get('transId')
+    rec = ReplyTransaction.objects.filter(id=transId)
+    _rec = rec[0]
+    _rec.isRead = 1
+    _rec.save()
+    return HttpResponse("success")
+
+
+@csrf_exempt
+@xframe_options_exempt
+def getReply(request):
+    patient_id = request.POST.get('patient_id')
+    doctor_id = request.POST.get('doctor_id')
+    sym_id = request.POST.get('sym_id')
+    analysis = request.POST.get('analysis')
+    treatment = request.POST.get('treatment')
+    send_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+
+    symptom = Symptom.objects.filter(id=sym_id)
+    if symptom:
+        print(patient_id, doctor_id, sym_id, analysis, treatment)
+        reply = ReplyTransaction(patient_id=patient_id, sym_id=sym_id,
+                                 doctor_id=doctor_id, analysis=analysis, treatment=treatment, send_time=send_time, isRead=0)
+        reply.save()
+        return HttpResponse("success")
+    else:
+        return HttpResponse("record deleted")
+
+
+@csrf_exempt
+@xframe_options_exempt
+def getReceivedReply(request):
+    userId = request.POST.get('userId')
+    # 获取symptom里面的信息
+    receivedReply = ReplyTransaction.objects.filter(patient_id=userId)
+    recRply = list(receivedReply)
+    data = []
+
+    for rec in recRply:
+        # 需要头像 user表的信息 patient表的信息 symptom表的信息
+        # 头像信息
+        img = Photo.objects.filter(user_id=rec.doctor_id)
+        _img = img[0]
+
+        # user表信息
+        user = User.objects.filter(id=rec.doctor_id)
+        _user = user[0]
+
+        # doctor表信息
+        doctor = Doctor.objects.filter(user_id=rec.doctor_id)
+        _doctor = doctor[0]
+
+        # symptom表信息
+        sym = Symptom.objects.filter(id=rec.sym_id)
+        if sym:
+            _sym = sym[0]
+            c_time = _sym.time
+            text = _sym.text
+        else:
+            c_time = ""
+            text = "This record has been deleted."
+        obj = {
+            "img": _img.img.url,
+            "username": _user.username,
+            "first_name": _user.first_name,
+            "last_name": _user.last_name,
+            "email": _user.email,
+            "age": _doctor.age,
+            "gender": _doctor.gender,
+            "address": _doctor.address,
+            "create_time": c_time,
+            "text": text,
+            "send_time": rec.send_time,
+            "transId": rec.id,
+            "isRead": rec.isRead,
+            "patient_id": rec.patient_id,
+            "doctor_id":rec.doctor_id,
+            "sym_id": rec.sym_id,
+            "analysis": rec.analysis,
+            "treatment": rec.treatment
+        }
+        data.append(obj)
+    return HttpResponse(json.dumps(data))

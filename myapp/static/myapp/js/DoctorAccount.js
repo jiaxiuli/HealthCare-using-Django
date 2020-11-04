@@ -73,6 +73,9 @@ $naviArray.click(function(){
         $("#rightArea").animate({
             "width": "40%"
         },900);
+        $('#reply_failed').animate({
+            "width": "40%"
+        },900);
         getReceivedRecord();
     }else{
 
@@ -80,6 +83,9 @@ $naviArray.click(function(){
             "width": "40%"
         },900);
         $("#rightArea").animate({
+            "width": "25%"
+        },900);
+         $('#reply_failed').animate({
             "width": "25%"
         },900);
     }
@@ -229,7 +235,7 @@ function uploadFile(obj, type) {
  return false;
 }
 
-
+ let getReplyIndex;
  function getReceivedRecord(){
             $.ajax({
                 url: '/getReceivedRecord',
@@ -268,6 +274,8 @@ function uploadFile(obj, type) {
                     }
                     $(".request").click(function () {
                         const index = $(this).find("#index").html();
+                        getReplyIndex = index;
+                        console.log(obj[index])
                         $(this).find(".red_point_unread").fadeOut(400);
                         $("#rightArea").html(
                             ' <div class="symInfo">\n' +
@@ -277,11 +285,23 @@ function uploadFile(obj, type) {
                             '<p class="recievedTime"> <em> Received at: </em>' + '&nbsp;' + obj[index].send_time + '</p>\n' +
                             '</div>\n' +
                             '<div class="reply">\n' +
-                            '<div class="analysis"></div>\n' +
-                            '<div class="treatment"></div>\n' +
-                            '</div>\n' +
+                            '<p class="a_and_t">&emsp;Analysis:&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;' +
+                            '&emsp;&emsp;&emsp;&emsp;&emsp;Treatment:</p>'+
+                            '<textarea class="analysis"></textarea>\n' +
+                            '<textarea class="treatment"></textarea>\n' +
                             '<button class="done">Done</button>\n' +
+                            '</div>\n' +
                             '</div>')
+                        $(".done").click(function (){
+                            let analysis = $(this).siblings(".analysis").val();
+                            let treatment = $(this).siblings(".treatment").val();
+                            let patient_id = obj[getReplyIndex].patient_id;
+                            let doctor_id = obj[getReplyIndex].doctor_id;
+                            let sym_id = obj[getReplyIndex].sym_id;
+
+                            sendReply(doctor_id, patient_id, sym_id, analysis, treatment);
+
+                        });
                         $.ajax({
                             url: '/recordIsRead',
                             type: 'post',
@@ -307,5 +327,35 @@ function uploadFile(obj, type) {
 
                 }
             })
+}
+
+function sendReply(doctor_id, patient_id, sym_id, analysis, treatment){
+    $.ajax({
+        url: '/getReply',
+        type: 'post',
+        data: {
+            doctor_id: doctor_id,
+            patient_id: patient_id,
+            sym_id: sym_id,
+            analysis: analysis,
+            treatment: treatment
+        },
+        success: function (data){
+            if(data == 'record deleted'){
+                $("#reply_failed").fadeIn(400);
+                setTimeout(function (){
+                     $("#reply_failed").fadeOut(400);
+                     $("#rightArea").html('<div id="appointments">\n' +
+                         '        <div id="noAppoint">No appointment currently</div>\n' +
+                         '        </div>');
+                }, 2000);
+            }else{
+                $('#reply_sent').fadeIn(400);
+                setTimeout(function (){
+                     $('#reply_sent').fadeOut(400);
+                }, 2000);
+            }
+        }
+    })
 }
 
