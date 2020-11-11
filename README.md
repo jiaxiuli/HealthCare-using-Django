@@ -22,12 +22,21 @@ These change will be saved in the database directly.
 click the record you want to send, then the doctor list will be displayed, and choose a foctor to send to.
 ![image](https://github.com/jiaxiuli/HealthCare-using-Django/blob/master/IMG/send.png)
 
+# move your mouse on the doctor to see their more detailed information
+![image](https://github.com/jiaxiuli/HealthCare-using-Django/blob/master/IMG/hover.png)
+
+# filtrate doctors based on their department.
+![image](https://github.com/jiaxiuli/HealthCare-using-Django/blob/master/IMG/filter.png)
+
 # change profile photo 
 by clicking the photo, users can change their photo by picking from their computer.
 ![image](https://github.com/jiaxiuli/HealthCare-using-Django/blob/master/IMG/change%20photo.png)
 
 # doctor account
 ![image](https://github.com/jiaxiuli/HealthCare-using-Django/blob/master/IMG/doctor%20account.png)
+
+# add specialty details
+![image](https://github.com/jiaxiuli/HealthCare-using-Django/blob/master/IMG/docDetails.png)
 
 # check how many records I have received
 There is a red point beside the unread message and beside the "received symptom" tag with the number of unread messages.
