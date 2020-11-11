@@ -34,8 +34,8 @@ const $mes = $('#message');
 const message = "click to update";
 
 const last_name = $changeln.html();
-const $unreadCount = $("#unreadCount");
-const $count = $("#count");
+const $unreadCount = $(".unreadCount");
+const $count = $(".count");
 
 const $photo = $('#photo').html();
 console.log($photo)
@@ -47,6 +47,11 @@ console.log($photo)
 setInterval(function (){
   getReceivedRecord();
 }, 1000);
+
+//向服务器询问是否有未读消息
+setInterval(function (){
+    checkIfUnreadMessage();
+}, 500)
 
 
 if(error == 1){
@@ -66,7 +71,11 @@ $naviArray.click(function(){
             $(this).css('background-color', 'rgba(0, 0, 0, 0)');
         }
     });
-     if(index == 2){
+    if(index == 5){
+        checkWorkInfo();
+    }
+     if(index == 2 || index == 3){
+
         $("#showArea").animate({
             "width": "25%"
         },900);
@@ -76,7 +85,11 @@ $naviArray.click(function(){
         $('#reply_failed').animate({
             "width": "40%"
         },900);
-        getReceivedRecord();
+          if(index == 2){
+              getReceivedRecord();
+         }else{
+                getChatHistory();
+          }
     }else{
 
         $("#showArea").animate({
@@ -98,6 +111,45 @@ $naviArray.click(function(){
            $(this).fadeOut(1000);
         }
     });
+});
+
+function checkWorkInfo(){
+    $.ajax({
+        url: "/checkWorkInfo",
+        type: "post",
+        data: {
+            user: $("input[name=id]").val(),
+        },
+        success: function (data) {
+             let obj = JSON.parse(data);
+             $('#FocusOnselect').val(obj[0]);
+             $('#main').val(obj[1]);
+             $('#quote').val(obj[2]);
+        }
+    });
+
+}
+
+$('#doctorWorkSubmit').click(function (){
+    let department = $('#FocusOnselect').val();
+    let main = $('#main').val();
+    let quote = $('#quote').val();
+    $.ajax({
+        url: "/saveDoctorWorkInfo",
+        type: "post",
+        data:{
+            user: $("input[name=id]").val(),
+            department : department,
+            main: main,
+            quote: quote
+        },
+        success: function (){
+            $('#workInfosaved').fadeIn(400);
+            setTimeout(function (){
+                $('#workInfosaved').fadeOut(400);
+            }, 2000);
+        }
+    })
 });
 
 setInterval(() => {
@@ -359,3 +411,260 @@ function sendReply(doctor_id, patient_id, sym_id, analysis, treatment){
     })
 }
 
+function getChatHistory(){
+
+    $.ajax({
+        url:'/getChatHistory',
+        type: 'post',
+        data:{
+            patient_id : $("input[name=id]").val(),
+        },
+        success: function (data){
+              let obj = JSON.parse(data);
+              $('#listForChat').html('');
+              for(var i = 0 ; i < obj.length ; i++ ){
+
+                    let last_message = obj[i].last_message;
+                    if(last_message.length > 15){
+                        last_message = last_message.substring(0, 15) + "...";
+                    }
+                    var isChattingwith = $('#rightArea').find('.chatToWho_id').html()
+                    if(obj[i].unReadCount != 0 && obj[i].user_id != isChattingwith){
+                         $('#listForChat').append(' <div class="chat_item">\n' +
+                       '                    <div class="unreadMessage">'+obj[i].unReadCount+'</div>'+
+                       '                    <div class="photo_chat"></div>\n' +
+                       '                    <div style="display: none" class="chatsendto">'+obj[i].user_id+'</div>'+
+                       '                    <div class="chat_name">'+obj[i].first_name+' '+obj[i].last_name+'</div>\n' +
+                       '                    <div class="chat_time">'+obj[i].last_mes_time+'</div>\n' +
+                       '                    <div class="chat_lastMessage">'+last_message+'</div>\n' +
+                       '                </div>');
+                    }else{
+                         $('#listForChat').append(' <div class="chat_item">\n' +
+                       '                    <div class="photo_chat"></div>\n' +
+                       '                    <div style="display: none" class="chatsendto">'+obj[i].user_id+'</div>'+
+                       '                    <div class="chat_name">'+obj[i].first_name+' '+obj[i].last_name+'</div>\n' +
+                       '                    <div class="chat_time">'+obj[i].last_mes_time+'</div>\n' +
+                       '                    <div class="chat_lastMessage">'+last_message+'</div>\n' +
+                       '                </div>');
+                    }
+                    if(obj[i].unReadCount != 0 && obj[i].user_id == isChattingwith){
+                         $(".chat_history").html('');
+                        requestChatHistory(isChattingwith, $("input[name=id]").val());
+                        messageHasBeenRead(isChattingwith, $("input[name=id]").val());
+                        //滚动条最下面
+                        $('.chat_history').scrollTop( $('.chat_history')[0].scrollHeight );
+                    }
+               }
+               for (var i = 0; i < obj.length; i++ ) {
+                        $(".photo_chat:eq(" + i + ")").css(
+                            {"background-image": "url('../../../.." + obj[i].img + "')"},
+                            {"background-size": "cover"});
+                    }
+
+
+               $('.chat_item').click(function (){
+                    let pat_id = $(this).find('.chatsendto').html();
+                    let doc_id = $("input[name=id]").val();
+                    $('#rightArea').html(
+                    '<p class="chatToWho_id" style="display: none">'+$(this).find('.chatsendto').html()+'</p>'+
+                    '<p class="chatToWho">Chatting with: '+$(this).find('.chat_name').html()+'</p>'+
+                    ' <div class="chat_history"></div>\n' +
+                    '<textarea class="chat_input"></textarea>\n' +
+                    '<button class="chat_send">Send</button>');
+                    //消息已读
+                    messageHasBeenRead(pat_id, doc_id, this);
+                     //请求聊天记录
+                    requestChatHistory(pat_id, doc_id);
+                     //滚动条最下面
+                   $('.chat_history').scrollTop( $('.chat_history')[0].scrollHeight );
+                    $(".chat_send").click(function (){
+                        var message = $(this).prev().val();
+                        var _this = this;
+                        $.ajax({
+                            url: '/chatTransaction',
+                            type: 'post',
+                            data:{
+                                receiver: pat_id,
+                                sender: doc_id,
+                                text: message
+                            },
+                            success: function (send_time){
+                                $(_this).prev().val("");
+                                $(_this).siblings(".chat_history").append(
+                                    '<div class="mes_sender">\n' +
+                                    '<div class="message_send_time">'+send_time+'</div>'+
+                                    '<div class="chatting_photo"></div>\n' +
+                                    '<span class="chat_content">' + message +
+                                    '</span>\n' +
+                                    '</div>');
+                                $(_this).siblings(".chat_history").find(".chatting_photo").css(
+                                     {"background-image": "url('../../../.."+$photo+"')"},
+                                     {"background-size": "cover"});
+                                getChatHistory();
+                                 //滚动条最下面
+                                $('.chat_history').scrollTop( $('.chat_history')[0].scrollHeight );
+                            }
+                        })
+                    });
+                 ////////////////////////////////////////////////////////////////////////////////////////
+               });
+        },
+        error: function (){}
+    })
+}
+$("#search").click(function (){
+    $(this).stop().animate({
+        "left": 0
+    }, 600, "swing")
+    return false;
+});
+$(window).click(function (){
+     $("#search").stop().animate({
+        "left": "-80%"
+    }, 600, "swing")
+});
+$("#search_go").click(function (){
+    $.ajax({
+        url:"/searchUser",
+        type: "post",
+        data: {
+            user: $("#search").find("input").val()
+        },
+        success: function (data){
+             let obj = JSON.parse(data);
+             if(obj.length == 0){
+                 $("#search_output").html("").append("did not find any user!")
+             }else{
+                  $("#search_output").html("").append(
+                 '<div id="result_id" style="display: none">'+obj[0].user+'</div>\n' +
+                 '<div id="result_photo"></div>\n' +
+                 '<div id="result_name">'+obj[0].firstname+' '+obj[0].lastname+'</div>'
+                );
+                $("#result_photo").css(
+                   {"background-image": "url('../../../.."+obj[0].img+"')"},
+                   {"background-size": "cover"}
+                );
+                $("#search_output").click(function (){
+                    let doc_id = $(this).find('#result_id').html();
+                    let pat_id = $("input[name=id]").val();
+                    $('#rightArea').html(
+                    '<p class="chatToWho">Chatting with: '+$(this).find('#result_name').html()+'</p>'+
+                    ' <div class="chat_history"></div>\n' +
+                    '<textarea class="chat_input"></textarea>\n' +
+                    '<button class="chat_send">Send</button>');
+
+                     //请求聊天记录
+                    requestChatHistory(doc_id, pat_id);
+
+                    $(".chat_send").click(function (){
+                        var message = $(this).prev().val();
+                        var _this = this;
+                        $.ajax({
+                            url: '/chatTransaction',
+                            type: 'post',
+                            data:{
+                                receiver: doc_id,
+                                sender: pat_id,
+                                text: message
+                            },
+                            success: function (send_time){
+                                $(_this).prev().val("");
+                                $(_this).siblings(".chat_history").append(
+                                    '<div class="mes_sender">\n' +
+                                    '<div class="message_send_time">'+send_time+'</div>'+
+                                    '<div class="chatting_photo"></div>\n' +
+                                    '<span class="chat_content">' + message +
+                                    '</span>\n' +
+                                    '</div>');
+                                $(_this).siblings(".chat_history").find(".chatting_photo").css(
+                                     {"background-image": "url('../../../.."+$photo+"')"},
+                                     {"background-size": "cover"});
+                                getChatHistory();
+                                 //滚动条最下面
+                                $('.chat_history').scrollTop( $('.chat_history')[0].scrollHeight );
+                            }
+                        })
+                    });
+                });
+             }
+        }
+    })
+});
+
+
+//请求聊天记录
+function requestChatHistory(doc_id, pat_id){
+     $.ajax({
+        url: '/showChatHistory',
+        type: 'post',
+        data:{
+            receiver: doc_id,
+            sender: pat_id,
+        },
+    success: function (data){
+         let list = JSON.parse(data);
+         let img = list[0];
+         for( var i = 1 ; i < list.length ; i++ ){
+             //右边
+             if(list[i].sender == pat_id){
+                 $(".chat_history").append( '<div class="mes_sender">\n' +
+                '<div class="message_send_time">'+list[i].time+'</div>'+
+                '<div class="chatting_photo"></div>\n' +
+                '<span class="chat_content">' + list[i].text +
+                '</span>\n' +
+                '</div>')
+             }else{
+                $(".chat_history").append( '<div class="mes_sender_left">\n' +
+                '<div class="message_send_time_left">'+list[i].time+'</div>'+
+                '<div class="chatting_photo_left"></div>\n' +
+                '<span class="chat_content_left">' + list[i].text +
+                '</span>\n' +
+                '</div>')
+             }
+         }
+         $(".chatting_photo_left").css(
+              {"background-image": "url('../../../.." + img + "')"},
+              {"background-size": "cover"}
+         )
+         $(".chatting_photo").css(
+              {"background-image": "url('../../../.." + $photo + "')"},
+              {"background-size": "cover"}
+         )
+        //滚动条最下面
+       $('.chat_history').scrollTop( $('.chat_history')[0].scrollHeight );
+    }
+})
+}
+
+function checkIfUnreadMessage(){
+    $.ajax({
+       url: "/checkIfUnreadMessage",
+       type: "post",
+       data:{
+           receiver: $("input[name=id]").val()
+       } ,
+       success: function (unread){
+           if(unread != 0){
+               getChatHistory();
+               $('.unreadCount2').fadeIn(400);
+               $('.count2').html(unread);
+           }else{
+                $('.unreadCount2').fadeOut(400);
+           }
+        }
+    });
+}
+
+function messageHasBeenRead(doc_id, pat_id, _this){
+     $.ajax({
+       url: "/messageHasBeenRead",
+       type: "post",
+       data:{
+           sender: doc_id,
+           receiver: pat_id
+       } ,
+       success: function (){
+            $(_this).find(".unreadMessage").fadeOut(400)
+        }
+    });
+}

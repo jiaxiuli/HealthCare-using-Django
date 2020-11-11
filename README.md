@@ -46,6 +46,15 @@ There is a red point beside the unread message and beside the "received symptom"
 # read reply
 ![image](https://github.com/jiaxiuli/HealthCare-using-Django/blob/master/IMG/read%20reply.png)
 
+# Online chat
+![image](https://github.com/jiaxiuli/HealthCare-using-Django/blob/master/IMG/online-chat.png)
+
+When new messages come, there are notifications. The person who sent you the lastest message will be at the top of the list.
+![image](https://github.com/jiaxiuli/HealthCare-using-Django/blob/master/IMG/chat-unread.png)
+
+You can search a user and start a chatting with him, or her, throught search their id number or username.
+![image](https://github.com/jiaxiuli/HealthCare-using-Django/blob/master/IMG/search.png)
+![image](https://github.com/jiaxiuli/HealthCare-using-Django/blob/master/IMG/search2.png)
 
 
 

@@ -8,14 +8,16 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.postgres import serializers
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.decorators.csrf import csrf_exempt
-
+from django.db.models import Q
 from myapp.forms import UserCreationForm
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from myapp.forms import PatientForm, DoctorForm, SymptomForm
-from myapp.models import Topic, Patient, Doctor, Symptom, Photo, SymTransaction, ReplyTransaction
+from myapp.models import Topic, Patient, Doctor, Symptom, Photo, SymTransaction, ReplyTransaction, Chat
 from django.views import View
+import pandas as pd
+import types
 
 
 # Create your views here.
@@ -34,6 +36,7 @@ class IndexView(View):
         return Topic.objects.all().order_by('id')[:10]
 
 
+@csrf_exempt
 def patient(request):
     msg = ''
     if request.method == 'POST':
@@ -53,6 +56,7 @@ def home(request):
     return render(request, 'myapp/home.html')
 
 
+@csrf_exempt
 def doctor(request):
     msg = ''
     if request.method == 'POST':
@@ -71,6 +75,7 @@ def account(request):
     return render(request, 'myapp/account.html')
 
 
+@csrf_exempt
 def userInfoChange(request):
     if request.method == 'POST':
         form_obj = PatientForm(request.POST)
@@ -196,9 +201,12 @@ def getDoctorList(request):
             doc['img'] = userPhoto[0].img.url
         else:
             doc['img'] = "/media/img/default.png"
+
+    print(docList)
     return HttpResponse(json.dumps(docList))
 
 
+@csrf_exempt
 def userInfoChange_doctor(request):
     if request.method == 'POST':
         form_obj = DoctorForm(request.POST)
@@ -265,6 +273,7 @@ def userInfoChange_doctor(request):
     return render(request, "myapp/doctor.html")
 
 
+@csrf_exempt
 def user_login(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -395,7 +404,7 @@ def register(request):
             if identity == '1':
                 mes = "click to update"
                 d = Doctor(user_id=id, username=username, first_name=mes, last_name=mes,
-                            address=mes, age=mes, gender=mes)
+                            address=mes, age=mes, gender=mes, department=1, main='', quote='')
                 d.save()
             else:
                 mes = "click to update"
@@ -462,7 +471,11 @@ def getReceivedRecord(request):
         # 需要头像 user表的信息 patient表的信息 symptom表的信息
         # 头像信息
         img = Photo.objects.filter(user_id=rec.patient_id)
-        _img = img[0]
+        if img:
+            _img = img[0]
+            photo = _img.img.url
+        else:
+            photo = "/media/img/default.png"
 
         # user表信息
         user = User.objects.filter(id=rec.patient_id)
@@ -482,7 +495,7 @@ def getReceivedRecord(request):
             c_time = ""
             text = "This record has been deleted."
         obj = {
-            "img": _img.img.url,
+            "img": photo,
             "username": _user.username,
             "first_name": _user.first_name,
             "last_name": _user.last_name,
@@ -598,4 +611,186 @@ def getReceivedReply(request):
             "treatment": rec.treatment
         }
         data.append(obj)
+    return HttpResponse(json.dumps(data))
+
+
+@csrf_exempt
+@xframe_options_exempt
+def chatTransaction(request):
+    sender = request.POST.get('sender')
+    receiver = request.POST.get('receiver')
+    message = request.POST.get('text')
+
+    send_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    _chat = Chat(sender=sender, receiver=receiver, text=message, time=send_time, isRead=0)
+    _chat.save()
+
+    return HttpResponse(send_time)
+
+
+@csrf_exempt
+@xframe_options_exempt
+def getChatHistory(request):
+    patient_id = request.POST.get("patient_id")
+    sent = Chat.objects.filter(sender=patient_id)
+    received = Chat.objects.filter(receiver=patient_id)
+    chatList = []
+    for i in sent:
+        chatList.append(i.receiver)
+    for i in received:
+        chatList.append(i.sender)
+    chatList = pd.unique(chatList).tolist()
+
+    data = []
+    for chat in chatList:
+        user = User.objects.filter(id=chat)
+        _user = user[0]
+
+        chatInfo = Chat.objects.filter(Q(sender=chat, receiver=patient_id) | Q(receiver=chat, sender=patient_id)).last()
+        unReadCount = Chat.objects.filter(Q(sender=chat, receiver=patient_id) & Q(isRead=0)).count()
+        photo = Photo.objects.filter(user_id=chat)
+        if photo:
+            _photo = photo[0]
+            img = _photo.img.url
+        else:
+            img = "/media/img/default.png"
+
+        obj = {
+            "first_name": _user.first_name,
+            "last_name": _user.last_name,
+            "last_message": chatInfo.text,
+            "last_mes_time": chatInfo.time,
+            "img": img,
+            "user_id": chat,
+            "unReadCount": unReadCount
+        }
+        data.append(obj)
+    data.sort(key=lambda x: x["last_mes_time"])
+    data.reverse()
+    return HttpResponse(json.dumps(data))
+
+
+@csrf_exempt
+@xframe_options_exempt
+def showChatHistory(request):
+    sender = request.POST.get("sender")
+    receiver = request.POST.get("receiver")
+
+    history = Chat.objects.filter(Q(sender=sender, receiver=receiver)
+                                  | Q(sender=receiver, receiver=sender)).values()
+    img = Photo.objects.filter(user_id=receiver)
+    if img:
+        _img = img[0]
+        photo = _img.img.url
+    else:
+        photo = "/media/img/default.png"
+    historyList = list(history)
+    historyList.insert(0, photo)
+
+    return HttpResponse(json.dumps(historyList))
+
+
+@csrf_exempt
+@xframe_options_exempt
+def searchUser(request):
+    user = request.POST.get("user")
+    data = []
+    if user.isdigit():
+        u_id = User.objects.filter(id=user)
+        if u_id:
+            _user = u_id[0]
+            img = Photo.objects.filter(user_id=_user.id)
+            if img:
+                _img = img[0]
+                photo = _img.img.url
+            else:
+                photo = "/media/img/default.png"
+            obj = {
+                "firstname": _user.first_name,
+                "lastname": _user.last_name,
+                "img": photo,
+                "user": _user.id
+            }
+            data.append(obj)
+    else:
+        u_username = User.objects.filter(username=user)
+        if u_username:
+            _user = u_username[0]
+            img = Photo.objects.filter(user_id=_user.id)
+            if img:
+                _img = img[0]
+                photo = _img.img.url
+            else:
+                photo = "/media/img/default.png"
+            obj = {
+                "firstname": _user.first_name,
+                "lastname": _user.last_name,
+                "img": photo,
+                "user": _user.id
+            }
+            data.append(obj)
+    return HttpResponse(json.dumps(data))
+
+
+@csrf_exempt
+@xframe_options_exempt
+def checkIfUnreadMessage(request):
+    receiver = request.POST.get("receiver")
+    message = Chat.objects.filter(Q(receiver=receiver) & Q(isRead=0)).count()
+    if message == 0:
+        return HttpResponse(0)
+    else:
+        return HttpResponse(message)
+
+
+@csrf_exempt
+@xframe_options_exempt
+def messageHasBeenRead(request):
+    receiver = request.POST.get("receiver")
+    sender = request.POST.get("sender")
+    chat = Chat.objects.filter(sender=sender, receiver=receiver)
+    for c in chat:
+        c.isRead = 1
+        c.save()
+    return HttpResponse()
+
+
+@csrf_exempt
+@xframe_options_exempt
+def saveDoctorWorkInfo(request):
+    user = request.POST.get("user")
+    department = request.POST.get("department")
+    main = request.POST.get("main")
+    quote = request.POST.get("quote")
+    doc = Doctor.objects.filter(user_id=user)
+    _doc = doc[0]
+    _doc.department = department
+    _doc.main = main
+    _doc.quote = quote
+    _doc.save()
+
+    return HttpResponse("success")
+
+
+@csrf_exempt
+@xframe_options_exempt
+def checkWorkInfo(request):
+    user = request.POST.get("user")
+
+    doc = Doctor.objects.filter(user_id=user)
+    _doc = doc[0]
+    data = []
+    if _doc.department:
+        data.append(_doc.department)
+    else:
+        data.append(1)
+    if _doc.main:
+        data.append(_doc.main)
+    else:
+        data.append("")
+    if _doc.quote:
+        data.append(_doc.quote)
+    else:
+        data.append("")
+
     return HttpResponse(json.dumps(data))

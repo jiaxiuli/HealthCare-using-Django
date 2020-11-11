@@ -1,5 +1,5 @@
 from django import forms
-from myapp.models import Patient, Doctor, Symptom, Photo, SymTransaction, ReplyTransaction
+from myapp.models import Patient, Doctor, Symptom, Photo, SymTransaction, ReplyTransaction, Chat
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
@@ -26,8 +26,11 @@ class DoctorForm(forms.ModelForm):
         gender = forms.CharField(required=False)
         address = forms.CharField(required=False)
         user_id = forms.CharField(required=False)
+        department = forms.CharField(required=False)
+        main = forms.CharField(required=False)
+        quote = forms.CharField(required=False)
 
-        fields = {'first_name', 'last_name', 'age', 'gender', 'address', 'user_id'}
+        fields = {'first_name', 'last_name', 'age', 'gender', 'address', 'user_id', 'department', 'main', 'quote'}
 
 
 class UserCreationForm(UserCreationForm):
@@ -81,3 +84,15 @@ class ReplyTransactionForm(forms.ModelForm):
         treatment = forms.CharField(required=False)
         fields = {'patient_id', 'doctor_id', 'sym_id', 'send_time', 'isRead', 'analysis', 'treatment'}
 
+
+class ChatForm(forms.ModelForm):
+    class Meta:
+        model = Chat
+
+        sender = forms.CharField(required=False)
+        receiver = forms.CharField(required=False)
+        time = forms.CharField(required=False)
+        text = forms.CharField(required=False)
+        isRead = forms.CharField(required=False)
+
+        fields = {'sender', 'receiver', 'time', 'text', 'isRead'}

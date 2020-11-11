@@ -29,8 +29,9 @@
     <div id="navigation">
         <div class="naviItems" value="1" style="background-color:  rgba(0, 0, 0, 0.3);">Personal information</div>
         <div class="naviItems" value="2">Symptom</div>
-        <div class="naviItems" value="3"><div id="unreadCount"><p id="count"></p></div>Doctor Reply</div>
-        <div class="naviItems" value="4">Patient field</div>
+        <div class="naviItems" value="3"><div class="unreadCount"><p class="count"></p></div>Doctor Reply</div>
+        <div class="naviItems" value="4"><div class="unreadCount2"><p class="count2"></p></div>Online Chat</div>
+         <div class="naviItems" value="5">Make an appointment</div>
     </div>
     <div id="showArea">
 
@@ -118,11 +119,28 @@
             <button id="add"></button>
         </div>
         <div class="shownItems" value="3">
-              <div id="requestArea">
-          </div>
+              <div id="requestArea"></div>
         </div>
-        <div class="shownItems" value="4">this is the area for item4 of patients</div>
+        <div class="shownItems" value="4">
+                <div id="search">
+                    <input type="text" id="search_input" placeholder="Input id or username">
+                    <button id="search_go">Search</button>
+
+                    <div id="search_output">
+                        <div id="result_photo"></div>
+                        <div id="result_name"></div>
+                    </div>
+                </div>
+            <div id="listForChat">
+
+            </div>
+        </div>
+    <div class="shownItems" value="5">
+        this is 5
     </div>
+    </div>
+
+    <div id="docInfoHover"></div>
     <div id="rightArea">
         <div id="appointments">
         <div id="noAppoint">No appointment currently</div>

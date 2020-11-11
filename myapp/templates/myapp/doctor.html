@@ -23,13 +23,14 @@
 
     <input name="file1" type="file" value="" size="20" id="fileUpload1" onchange ="uploadFile(this,1)">
     <div id="show"></div>
-
+{#    <div id="notification_box">You got a new message!</div>#}
 
     <span id="logout"> <a href="{% url 'myapp:user_logout' %}"> log out</a></span>
     <div id="navigation">
         <div class="naviItems" value="1" style="background-color:  rgba(0, 0, 0, 0.3);">Personal information</div>
-        <div class="naviItems" value="2"><div id="unreadCount"><p id="count"></p></div>Received Symptom</div>
-        <div class="naviItems" value="3">Doctor field</div>
+        <div class="naviItems" value="5">Specialty Details</div>
+        <div class="naviItems" value="2"><div class="unreadCount"><p class="count"></p></div>Received Symptom</div>
+        <div class="naviItems" value="3"><div class="unreadCount2"><p class="count2"></p></div>Online Chat</div>
         <div class="naviItems" value="4">Doctor field</div>
     </div>
     <div id="showArea">
@@ -84,11 +85,51 @@
                <div id="submit"><input type="submit" value="OK" id="subtn" name="submit1"></div>
             </form>
         </div>
+         <div class="shownItems" value="5">
+            <div id="workInfosaved">Saved</div>
+            <div id="doctorWorkInfo">
+                  <p>Department:</p>
+                  <select id="FocusOnselect" style="width: 200px">
+                       <option value="1">General Practitioner</option>
+                       <option value="2">Pediatrician</option>
+                       <option value="3">Endocrinologist</option>
+                       <option value="4">Neurologist</option>
+                       <option value="5">Rheumatologist</option>
+                       <option value="6">Nephrologist</option>
+                       <option value="7">Pulmonologist</option>
+                       <option value="8">Surgeon</option>
+                       <option value="9">Ophthalmologist</option>
+                       <option value="10">Oncologist</option>
+                       <option value="11">Urologist</option>
+                       <option value="12">Otolaryngologist</option>
+                       <option value="13">Dermatologist</option>
+                       <option value="14">Cardiologist</option>
+                </select>
+                <br>
+                <p>Research interests:</p>
+                <textarea name="main" id="main" ></textarea>
+                <br>
+                <p>Motto:</p>
+                <textarea name="quote" id="quote"></textarea>
+
+                <button id="doctorWorkSubmit">OK</button>
+            </div>
+        </div>
         <div class="shownItems" value="2">
           <div id="requestArea">
           </div>
         </div>
         <div class="shownItems" value="3">
+             <div id="search">
+                    <input type="text" id="search_input" placeholder="Input id or username">
+                    <button id="search_go">Search</button>
+
+                    <div id="search_output">
+                        <div id="result_photo"></div>
+                        <div id="result_name"></div>
+                    </div>
+                </div>
+             <div id="listForChat"></div>
         </div>
         <div class="shownItems" value="4">this is the area for item4 of Doctor</div>
     </div>
