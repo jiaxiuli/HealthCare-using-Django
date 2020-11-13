@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../static/myapp/CSS/account.css">
+     <link rel="stylesheet" href="../../static/myapp/CSS/laydate.css">
     <title>My account</title>
 </head>
 <body>
@@ -136,7 +137,20 @@
             </div>
         </div>
     <div class="shownItems" value="5">
-        this is 5
+        <div id="appointmentArea">
+            <p>Choose a doctor: </p>
+            <select name="" id="">
+                <option value="">Mike</option>
+                <option value="">Rose</option>
+                <option value="">Keith</option>
+            </select>
+            <br>
+            <input type="text" class="" placeholder="select date" id="appointmentDate">
+            <br>
+            <select name="" id="">
+                <option value=""></option>
+            </select>
+        </div>
     </div>
     </div>
 
@@ -151,4 +165,14 @@
 <script src="../../static/myapp/js/jquery-1.10.1.js"></script>
 <script src="../../static/myapp/js/ajaxfileupload.js"></script>
 <script src="../../static/myapp/js/account.js"></script>
+<script src="../../static/myapp/js/laydate.js"></script>
+<script>
+lay('#version').html('-v'+ laydate.v);
+
+//执行一个laydate实例
+laydate.render({
+  elem: '#appointmentDate', //指定元素
+  lang: 'en'
+});
+</script>
 </html>
