@@ -102,3 +102,14 @@ class Chat(models.Model):
     def __str__(self):
         return "sender: {}, receiver:{}, time:{}, text:{}, isRead:{}"\
             .format(self.sender, self.receiver, self.time, self.text, self.isRead)
+
+
+class Appointment(models.Model):
+    patient = models.CharField(max_length=150, null=True, blank=True)
+    doctor = models.CharField(max_length=150, null=True, blank=True)
+    time = models.CharField(max_length=150, null=True, blank=True)
+    date = models.CharField(max_length=150, null=True, blank=True)
+
+    def __str__(self):
+        return "patient: {}, doctor:{}, time:{}, date:{}"\
+            .format(self.patient, self.doctor, self.time, self.date)

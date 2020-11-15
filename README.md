@@ -65,5 +65,18 @@ You can search a user and start a chatting with him, or her, throught search the
 ![image](https://github.com/jiaxiuli/HealthCare-using-Django/blob/master/IMG/search.png)
 ![image](https://github.com/jiaxiuli/HealthCare-using-Django/blob/master/IMG/search2.png)
 
+# make an appointment
+For patients, when they login to their account, they will see the appointments that they have booked.
+![image](https://github.com/jiaxiuli/HealthCare-using-Django/blob/master/IMG/appointment.png)
+They can make an appointment here.
+![image](https://github.com/jiaxiuli/HealthCare-using-Django/blob/master/IMG/make_appointment.png)
+the appointments list will be ordered by the date.
+![image](https://github.com/jiaxiuli/HealthCare-using-Django/blob/master/IMG/booked.png)
+
+For doctors, when they login to their account, they will see the appointments for today
+![image](https://github.com/jiaxiuli/HealthCare-using-Django/blob/master/IMG/doc_appointment.png)
+doctors can view all appointments of them here.
+![image](https://github.com/jiaxiuli/HealthCare-using-Django/blob/master/IMG/doc_view_appointment.png)
+
 
 

@@ -31,7 +31,7 @@
         <div class="naviItems" value="5">Specialty Details</div>
         <div class="naviItems" value="2"><div class="unreadCount"><p class="count"></p></div>Received Symptom</div>
         <div class="naviItems" value="3"><div class="unreadCount2"><p class="count2"></p></div>Online Chat</div>
-        <div class="naviItems" value="4">Doctor field</div>
+        <div class="naviItems" value="4">view all appointments</div>
     </div>
     <div id="showArea">
 
@@ -131,7 +131,11 @@
                 </div>
              <div id="listForChat"></div>
         </div>
-        <div class="shownItems" value="4">this is the area for item4 of Doctor</div>
+        <div class="shownItems" value="4">
+            <div id="AllAppointments">
+                <div class="allAppItems"></div>
+            </div>
+        </div>
     </div>
     <div id="reply_sent">Reply Sent</div>
     <div id="reply_failed">
@@ -140,8 +144,12 @@
     </div>
      <div id="rightArea">
         <div id="appointments">
-        <div id="noAppoint">No appointment currently</div>
-        </div>
+{#            <div id="noAppoint">No appointment for today</div>#}
+{#            <div id="appointForToday_Doc">#}
+{#                <p>appointments for today:</p>#}
+{#                <p>8am - 10am:</p>#}
+{#            </div>#}
+{#      </div>
     </div>
 </body>
 <script src="../../static/myapp/js/jquery-1.10.1.js"></script>

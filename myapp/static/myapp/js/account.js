@@ -69,7 +69,7 @@ setInterval(function (){
     checkIfUnreadMessage();
 }, 500)
 
-
+getAppointmentList();
 $naviArray.click(function(){
     var index = this.getAttribute("value");
     $naviArray.each(function(){
@@ -80,15 +80,16 @@ $naviArray.click(function(){
         }
     });
     if(index == 1){
-        $('#rightArea').html('  <div id="appointments">\n' +
-            '        <div id="noAppoint">No appointment currently</div>\n' +
-            '        </div>');
+       getAppointmentList();
     }
-    if(index == 3 || index == 4){
+    if(index == 3 || index == 4 || index == 5){
         if(index == 3){
             getReceivedReply();
-        }else{
+        }else if(index == 4){
             getChatHistory();
+        }else{
+            appointmentGetDocList();
+            getAppointmentList();
         }
 
         $showArea.animate({
@@ -267,7 +268,7 @@ function DeleteRecord(_this){
                     DeleteRecord(this);
                });
                  $(".sendbtn").click(function (){
-                    getDoctorList(this);
+                    getDoctorList(this, 0, true, true);
                 });
 
                $(".record").hover(  function () {
@@ -314,7 +315,7 @@ function addRecord(){
                     DeleteRecord(this);
                });
                $(".sendbtn").click(function (){
-                    getDoctorList(this);
+                    getDoctorList(this, 0, true, true);
                 });
                $(".record").hover(  function () {
                         $(this).find("button").fadeIn(100)
@@ -906,5 +907,162 @@ function messageHasBeenRead(doc_id, pat_id, _this){
        success: function (){
             $(_this).find(".unreadMessage").fadeOut(400)
         }
+    });
+}
+function appointmentGetDocList(){
+
+     $.ajax({
+       url: "/appointmentGetDocList",
+       type: "post",
+       data:{
+
+       } ,
+       success: function (data){
+            let obj = JSON.parse(data);
+            $('#appointmentDoc').html('');
+            for(var i = 0 ; i < obj.length ; i++ ){
+                 $('#appointmentDoc').append('<option value="'+obj[i].user_id+'">'+obj[i].first_name+' '+obj[i].last_name+'</option>');
+            }
+
+        }
+    });
+}
+$('#appointmentSubmit').click(function (){
+    let appointDoc = $('#appointmentDoc').val();
+    let appointDate = $('#appointmentDate').val();
+    let appointTime = $('#appointmentTime').val();
+    var date = new Date();
+    var year = date.getFullYear();
+    var month = date.getMonth() + 1;
+    var day = date.getDate();
+    var today = year+'-'+month+'-'+day;
+
+    var date1 = new Date(today);
+    var date2 = new Date(appointDate);
+
+    if(date1.getTime() >= date2.getTime() || appointDate == ''){
+        $('#connotBook').fadeIn(400);
+        setTimeout(function (){
+             $('#connotBook').fadeOut(400);
+        }, 2500);
+    }else{
+        $.ajax({
+       url: "/makeAppointment",
+       type: "post",
+       data:{
+           patient: $("input[name=id]").val(),
+           doctor: appointDoc,
+           date: appointDate,
+           time: appointTime
+       } ,
+       success: function (data){
+           $('#booked').fadeIn(400);
+        setTimeout(function (){
+             $('#booked').fadeOut(400);
+        }, 2500);
+            getAppointmentList();
+        }
+    });
+    }
+});
+function getAppointmentList(){
+     $.ajax({
+       url: "/getAppointmentList",
+       type: "post",
+       data:{
+           patient: $("input[name=id]").val()
+       } ,
+       success: function (data) {
+           let obj = JSON.parse(data);
+           if(obj.length == 0){
+               $('#rightArea').html('<div id="appointments">\n' +
+               '            <div id="noAppoint">No appointment currently</div>'+
+           '                </div>');
+           }else{
+                $('#rightArea').html('<div id="appointments">\n' +
+                    '       <div id="appointmentToday"><p>Today</p></div>'+
+               '            <div id="hasAppoint">'+
+           '                </div>'+
+           '                </div>');
+           $('#hasAppoint').html('');
+             var date = new Date();
+             var year = date.getFullYear();
+             var month = date.getMonth() + 1;
+             var day = date.getDate();
+             var today = year+'-'+month+'-'+day;
+             var dateToday = new Date(today);
+             var hasAppToday = false;
+           for(var i = 0 ; i < obj.length ; i++){
+
+                if(today == obj[i].date){
+                    hasAppToday = true;
+                    let name = obj[i].first_name + ' ' + obj[i].last_name;
+                    let time;
+                    if(obj[i].time == 8){
+                        time = "8am - 10am";
+                    }else if(obj[i].time == 10){
+                        time = "10am - 12am";
+                    }else if(obj[i].time == 14){
+                        time = "2pm - 4pm";
+                    }else{
+                        time = "4pm - 6pm";
+                    }
+                    $('#appointmentToday').append(
+                        '<div class="appointTodayItems">'+time+'<br>---'+name+'<br>'+'<hr>'+'</div>'
+                    );
+                }
+           }
+           if(!hasAppToday){
+                 $('#appointmentToday').append(
+                        '<div class="appointTodayItems">No appointment today.<br><hr></div>'
+                    );
+           }
+           var appointNum = 1;
+           for(var i = 0 ; i < obj.length ; i++ ){
+               var dateDay = new Date(obj[i].date);
+               if(dateDay > dateToday){
+                       let name = obj[i].first_name + ' ' + obj[i].last_name;
+                       let time;
+                       if(obj[i].time == 8){
+                           time = "8am - 10am";
+                       }else if(obj[i].time == 10){
+                           time = "10am - 12am";
+                       }else if(obj[i].time == 14){
+                           time = "2pm - 4pm";
+                       }else{
+                           time = "4pm - 6pm";
+                       }
+                       $('#hasAppoint').append(' <div class="appointItems">\n' +
+                       '                    <p class="appointID" style="display: none">'+obj[i].id+'</p>\n' +
+                       '                    <p>appointment #'+appointNum+'</p>\n' +
+                       '                    <p>With:&emsp; '+name+'</p>\n' +
+                       '                    <p>Date:&emsp; '+obj[i].date+'</p>\n' +
+                       '                    <p>Time:&emsp; '+time+'</p>\n' +
+                       '                    <button class="appointCancel">Cancel this appointment</button>\n' +
+                       '                </div>');
+                       appointNum++;
+                       }
+           }
+           $(".appointCancel").click(function (){
+              let appointID = $(this).siblings('.appointID').html();
+                $.ajax({
+                    url: "/deleteAppointment",
+                    type: "post",
+                    data:{
+                        appointID: appointID
+                    } ,
+                    success: function (data){
+                          $('#canceled').fadeIn(400);
+                            setTimeout(function (){
+                            $('#canceled').fadeOut(400);
+                            }, 2500);
+                        getAppointmentList();
+                    }
+                    });
+           });
+           }
+
+
+       }
     });
 }

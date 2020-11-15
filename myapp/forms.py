@@ -1,5 +1,5 @@
 from django import forms
-from myapp.models import Patient, Doctor, Symptom, Photo, SymTransaction, ReplyTransaction, Chat
+from myapp.models import Patient, Doctor, Symptom, Photo, SymTransaction, ReplyTransaction, Chat, Appointment
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
@@ -96,3 +96,15 @@ class ChatForm(forms.ModelForm):
         isRead = forms.CharField(required=False)
 
         fields = {'sender', 'receiver', 'time', 'text', 'isRead'}
+
+
+class AppointmentForm(forms.ModelForm):
+    class Meta:
+        model = Appointment
+
+        patient = forms.CharField(required=False)
+        doctor = forms.CharField(required=False)
+        time = forms.CharField(required=False)
+        date = forms.CharField(required=False)
+
+        fields = {'patient', 'doctor', 'time', 'date'}

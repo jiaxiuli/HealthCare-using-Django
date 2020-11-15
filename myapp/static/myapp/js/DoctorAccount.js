@@ -52,7 +52,7 @@ setInterval(function (){
 setInterval(function (){
     checkIfUnreadMessage();
 }, 500)
-
+DocGetAppointmentForToday();
 
 if(error == 1){
     $mes.fadeIn(800);
@@ -91,7 +91,12 @@ $naviArray.click(function(){
                 getChatHistory();
           }
     }else{
-
+        if(index == 4){
+            getAllAppointments();
+        }
+        if(index == 1){
+            DocGetAppointmentForToday();
+        }
         $("#showArea").animate({
             "width": "40%"
         },900);
@@ -397,9 +402,7 @@ function sendReply(doctor_id, patient_id, sym_id, analysis, treatment){
                 $("#reply_failed").fadeIn(400);
                 setTimeout(function (){
                      $("#reply_failed").fadeOut(400);
-                     $("#rightArea").html('<div id="appointments">\n' +
-                         '        <div id="noAppoint">No appointment currently</div>\n' +
-                         '        </div>');
+                     DocGetAppointmentForToday();
                 }, 2000);
             }else{
                 $('#reply_sent').fadeIn(400);
@@ -665,6 +668,112 @@ function messageHasBeenRead(doc_id, pat_id, _this){
        } ,
        success: function (){
             $(_this).find(".unreadMessage").fadeOut(400)
+        }
+    });
+}
+function DocGetAppointmentForToday(){
+     let date = new Date();
+     let year = date.getFullYear();
+     let month = date.getMonth() + 1;
+     let day = date.getDate();
+     let today = year+'-'+month+'-'+day;
+     $.ajax({
+       url: "/DocGetAppointmentForToday",
+       type: "post",
+       data:{
+           today: today,
+           docId:  $("input[name=id]").val(),
+       } ,
+       success: function (data){
+           $('#rightArea').html('<div id="appointments"></div>')
+            let list = JSON.parse(data);
+            console.log(list);
+            if(list[0].length == 0 && list[1].length == 0 && list[2].length == 0 && list[3].length == 0){
+                $('#appointments').html( '<div id="noAppoint">No appointment for today.</div>\n');
+            }else{
+                $('#appointments').html( '  <div id="appointForToday_Doc">\n' +
+                    '                <p>appointments for today:</p>\n' +
+                    '            </div>');
+                 $('#appointForToday_Doc').append('<p>8am - 10am:</p>');
+                for(var i = 0 ; i < list[0].length ; i++ ){
+                   $('#appointForToday_Doc').append(list[0][i].fname + ' ' + list[0][i].lname + '<br>');
+                }
+                 $('#appointForToday_Doc').append('<hr><p>10am - 12am:</p>');
+                for(var i = 0 ; i < list[1].length ; i++ ){
+                   $('#appointForToday_Doc').append(list[1][i].fname + ' ' + list[1][i].lname + '<br>');
+                }
+                $('#appointForToday_Doc').append('<hr><p>2pm - 4pm:</p>');
+                for(var i = 0 ; i < list[2].length ; i++ ){
+                   $('#appointForToday_Doc').append(list[2][i].fname + ' ' + list[2][i].lname + '<br>');
+                }
+                 $('#appointForToday_Doc').append('<hr><p>4pm - 6pm:</p>');
+                for(var i = 0 ; i < list[3].length ; i++ ){
+                   $('#appointForToday_Doc').append(list[3][i].fname + ' ' + list[3][i].lname + '<br>');
+                }
+            }
+        }
+    });
+}
+function getAllAppointments(){
+    $.ajax({
+       url: "/getAllAppointments",
+       type: "post",
+       data:{
+           docId:  $("input[name=id]").val(),
+       } ,
+       success: function (data){
+           let obj = JSON.parse(data);
+            $('#AllAppointments').html('');
+           let dateList = []
+           for(var i = 0 ; i < obj.length ; i++ ){
+               dateList.push(obj[i].date);
+           }
+           dateList = Array.from(new Set(dateList));
+           let list = [];
+           for(let i = 0 ; i < dateList.length ; i++ ){
+               let list8 = [];
+               let list10 = [];
+               let list14 = [];
+               let list16 = [];
+               for(let j = 0 ; j < obj.length ; j++ ){
+                   if(obj[j].date == dateList[i]){
+                       let name = obj[j].first_name + ' ' + obj[j].last_name;
+                       switch (obj[j].time){
+                            case '8': list8.push(name);break;
+                            case '10': list10.push(name);break;
+                            case '14': list14.push(name);break;
+                            case '16': list16.push(name);break;
+                       }
+                   }
+               }
+               let temp = new Array();
+               temp.push(list8);
+               temp.push(list10);
+               temp.push(list14);
+               temp.push(list16);
+               list.push(temp);
+           }
+         for(let i = 0 ; i < list.length ; i++ ){
+             let date = dateList[i];
+             $('#AllAppointments').append('<div class="appendDate">'+date+'</div>');
+             $('#AllAppointments').append('<div class="appendTime">8am - 10am:</div>');
+             for(let j = 0 ; j < list[i][0].length ; j++ ){
+                 $('#AllAppointments').append('<div class="appendName">'+list[i][0][j]+'</div>');
+             }
+              $('#AllAppointments').append('<div class="appendTime"><hr>10am - 12am:</div>');
+             for(let j = 0 ; j < list[i][1].length ; j++ ){
+                 $('#AllAppointments').append('<div class="appendName">'+list[i][1][j]+'</div>');
+             }
+              $('#AllAppointments').append('<div class="appendTime"><hr>2pm - 4pm:</div>');
+             for(let j = 0 ; j < list[i][2].length ; j++ ){
+                 $('#AllAppointments').append('<div class="appendName">'+list[i][2][j]+'</div>');
+             }
+              $('#AllAppointments').append('<div class="appendTime"><hr>4pm - 6pm:</div>');
+             for(let j = 0 ; j < list[i][3].length ; j++ ){
+                 $('#AllAppointments').append('<div class="appendName">'+list[i][3][j]+'</div>');
+             }
+
+         }
         }
     });
 }

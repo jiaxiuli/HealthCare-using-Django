@@ -139,25 +139,41 @@
     <div class="shownItems" value="5">
         <div id="appointmentArea">
             <p>Choose a doctor: </p>
-            <select name="" id="">
-                <option value="">Mike</option>
-                <option value="">Rose</option>
-                <option value="">Keith</option>
+            <select id="appointmentDoc">
+
             </select>
             <br>
-            <input type="text" class="" placeholder="select date" id="appointmentDate">
+             <p>Select date: </p>
+            <input type="text" id="appointmentDate" placeholder="select date" id="appointmentDate">
             <br>
-            <select name="" id="">
-                <option value=""></option>
+            <p>Select time:</p>
+            <select id="appointmentTime">
+                <option value="8">8AM</option>
+                <option value="10">10AM</option>
+                <option value="14">2PM</option>
+                <option value="16">4PM</option>
             </select>
+            <button id="appointmentSubmit">Submit</button>
         </div>
     </div>
     </div>
-
+    <div id="connotBook"><br> appointments should be booked at least 1 day in advance.</div>
+    <div id="booked"> Booked. </div>
+    <div id="canceled"> Canceled. </div>
     <div id="docInfoHover"></div>
     <div id="rightArea">
         <div id="appointments">
-        <div id="noAppoint">No appointment currently</div>
+{#            <div id="noAppoint">No appointment currently</div>#}
+{#            <div id="hasAppoint">#}
+{#                <div class="appointItems">#}
+{#                    <p>appointment #1</p>#}
+{#                    <p>With:&emsp; Rose Jone</p>#}
+{#                    <p>Date:&emsp; 2020-11-13</p>#}
+{#                    <p>Time:&emsp; 8AM</p>#}
+{#                    <button>Cancel this appointment</button>#}
+{#                </div>#}
+{#                <div class="appointItems"></div>#}
+            </div>
         </div>
     </div>
 

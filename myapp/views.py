@@ -14,7 +14,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from myapp.forms import PatientForm, DoctorForm, SymptomForm
-from myapp.models import Topic, Patient, Doctor, Symptom, Photo, SymTransaction, ReplyTransaction, Chat
+from myapp.models import Topic, Patient, Doctor, Symptom, Photo, SymTransaction, ReplyTransaction, Chat, Appointment
 from django.views import View
 import pandas as pd
 import types
@@ -794,3 +794,104 @@ def checkWorkInfo(request):
         data.append("")
 
     return HttpResponse(json.dumps(data))
+
+
+@csrf_exempt
+@xframe_options_exempt
+def appointmentGetDocList(request):
+    doctorList = Doctor.objects.all().values()
+    docList = list(doctorList)
+
+    return HttpResponse(json.dumps(docList))
+
+
+@csrf_exempt
+@xframe_options_exempt
+def makeAppointment(request):
+    patient = request.POST.get("patient")
+    doctor = request.POST.get("doctor")
+    date = request.POST.get("date")
+    time = request.POST.get("time")
+    _a = Appointment(patient=patient, doctor=doctor, date=date, time=time)
+    _a.save()
+    return HttpResponse()
+
+
+@csrf_exempt
+@xframe_options_exempt
+def getAppointmentList(request):
+    patient = request.POST.get("patient")
+    _appoint = Appointment.objects.filter(patient=patient).values()
+    appointList = list(_appoint)
+    if _appoint:
+        for a in _appoint:
+            doc = Doctor.objects.filter(user_id=a['doctor'])
+            a['first_name'] = doc[0].first_name
+            a['last_name'] = doc[0].last_name
+    appointList.sort(key=lambda x: x["date"])
+    return HttpResponse(json.dumps(appointList))
+
+
+@csrf_exempt
+@xframe_options_exempt
+def deleteAppointment(request):
+    appointmentID = request.POST.get("appointID")
+    appoint = Appointment.objects.filter(id=appointmentID)
+    appoint.delete()
+
+    return HttpResponse()
+
+
+@csrf_exempt
+@xframe_options_exempt
+def DocGetAppointmentForToday(request):
+    docId = request.POST.get("docId")
+    today = request.POST.get("today")
+    appoints = Appointment.objects.filter(doctor=docId, date=today).values()
+    appointsList = list(appoints)
+    data = [[], [], [], []]
+    for a in appointsList:
+        pat = Patient.objects.filter(user_id=a['patient'])
+        fname = pat[0].first_name
+        lname = pat[0].last_name
+        if a['time'] == '8':
+            obj = {
+                "fname": fname,
+                "lname": lname,
+            }
+            data[0].append(obj)
+        elif a['time'] == '10':
+            obj = {
+                "fname": fname,
+                "lname": lname,
+            }
+            data[1].append(obj)
+        elif a['time'] == '14':
+            obj = {
+                "fname": fname,
+                "lname": lname,
+            }
+            data[2].append(obj)
+        else:
+            obj = {
+                "fname": fname,
+                "lname": lname,
+            }
+            data[3].append(obj)
+
+    return HttpResponse(json.dumps(data))
+
+
+@csrf_exempt
+@xframe_options_exempt
+def getAllAppointments(request):
+    doctor = request.POST.get("docId")
+    _appoint = Appointment.objects.filter(doctor=doctor).values()
+    appointList = list(_appoint)
+    if _appoint:
+        for a in _appoint:
+            pat = Patient.objects.filter(user_id=a['patient'])
+            a['first_name'] = pat[0].first_name
+            a['last_name'] = pat[0].last_name
+    appointList.sort(key=lambda x: x["date"])
+    return HttpResponse(json.dumps(appointList))

@@ -74,6 +74,7 @@ body{
     color: white;
     font-size: 35px;
     overflow: auto;
+    overflow-x: hidden;
 }
 #noAppoint{
     position: absolute;
@@ -1066,4 +1067,183 @@ em{
       border-radius: 10px;
       font-size: 13px;
       z-index: 100;
+  }
+  #appointmentArea > p{
+      margin-top: 50px;
+      font-weight: 900;
+      color: lightskyblue;
+  }
+  #appointmentSubmit{
+      position: absolute;
+      width: 30%;
+      left: 35%;
+      height: 50px;
+      top: 390px;
+      color: white;
+      border-radius: 30px;
+      background-color: rgba(0,0,0,0.3);
+      font-weight: 900;
+      border: 1px solid white;
+  }
+  #hasAppoint{
+      position: relative;
+      width: 90%;
+      left: 5%;
+      height: 99%;
+  }
+  .appointItems{
+      position: relative;
+      width: 100%;
+      height: 28%;
+      margin-top: 10px;
+      border-radius: 30px;
+      border: 1px dashed darkgray;
+  }
+  .appointItems>p{
+      margin-left: 30px;
+      font-size: 15px;
+      font-weight: 900;
+  }
+  .appointItems>p:nth-child(2){
+     font-size: 22px;
+     color: #00F7DE;
+  }
+  .appointCancel{
+      position: absolute;
+      left: 30px;
+      height: 20px;
+      top: 80%;
+      background-color: rgba(0,0,0,0.5);
+      color: darkgray;
+      border: 1px solid darkgray;
+      font-weight: 900;
+      border-radius: 10px;
+  }
+  #connotBook{
+      position: absolute;
+      background-color: rgba(0,0,0,0.7);
+      border-radius: 40px;
+      width: 400px;
+      height: 100px;
+      color: white;
+      font-size: 20px;
+      font-weight: 900;
+      text-align: center;
+      left: 450px;
+      top: 400px;
+      display: none;
+  }
+  #booked{
+      position: absolute;
+      background-color: rgba(0,0,0,0.7);
+      border-radius: 40px;
+      width: 400px;
+      height: 100px;
+      color: white;
+      font-size: 40px;
+      font-weight: 900;
+      line-height: 100px;
+      text-align: center;
+      left: 450px;
+      top: 400px;
+      display: none;
+  }
+  #canceled{
+      position: absolute;
+      background-color: rgba(0,0,0,0.7);
+      border-radius: 40px;
+      width: 400px;
+      height: 100px;
+      color: white;
+      font-size: 40px;
+      font-weight: 900;
+      line-height: 100px;
+      text-align: center;
+      left: 450px;
+      top: 400px;
+      display: none;
+  }
+  #appointmentToday{
+      position: relative;
+      width: 90%;
+      left: 5%;
+      height: auto;
+  }
+  #appointmentToday>p{
+      position: relative;
+      left: 30px;
+      font-size: 23px;
+      font-weight: 900;
+      color: #00F7DE;
+  }
+  .appointTodayItems{
+      position: relative;
+      left: 30px;
+      width: 80%;
+      margin-top: 10px;
+      font-size: 15px;
+      font-weight: 900;
+  }
+  hr{
+     height:5px;
+      border:none;
+      width: 60%;
+      border-top:5px ridge darkgray;
+  }
+  #appointForToday_Doc{
+      position: absolute;
+      width: 90%;
+      left: 5%;
+      height: 99%;
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 20px;
+
+  }
+  #appointForToday_Doc>p{
+      position: relative;
+      font-size: 20px;
+      font-weight: 900;
+      color: #009688;
+      margin-top: 10px;
+  }
+  #appointForToday_Doc>p:nth-child(1){
+      position: relative;
+      font-size: 25px;
+      font-weight: 900;
+      padding-bottom: 10px;
+      color: #00F7DE;
+  }
+  #AllAppointments{
+      position: absolute;
+      width: 90%;
+      left: 5%;
+      height: 90%;
+      overflow-x: hidden;
+  }
+  .appendDate{
+      position: relative;
+      text-align: left;
+      font-size: 25px;
+      font-weight: 900;
+      color: #00F7DE;
+      left: 30px;
+      margin-top: 20px;
+  }
+  .appendTime{
+      position: relative;
+      text-align: left;
+      font-size: 20px;
+      font-weight: 900;
+      color: #009688;
+      left: 120px;
+      margin-top: 10px;
+  }
+.appendName{
+      position: relative;
+      text-align: left;
+      font-size: 15px;
+      font-weight: 900;
+      color: white;
+      left: 220px;
   }
